@@ -1,10 +1,12 @@
 #[macro_use]
 extern crate structopt;
 
-use std::env;
-
 use todo::*;
+use termion::screen::AlternateScreen;
+use std::io::stdout;
+use std::io::Write;
 use std::fmt::Error;
+use std::result::Result::Ok;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "todo")]
@@ -13,18 +15,25 @@ struct Opt {
     interactive: bool,
 }
 
-fn main() -> Option<String> {
-    let list = get_todo_list();
-    if list.len() < 1 {
-        println!("No Tickets Found");
-        return None
-    }
-    loop {
-        match run(list) {
-            Some(_) => {
-                break
-            },
-            None => {},
-        }
-    }
+fn main() -> Result<(), Error>{
+    match run() {
+        Ok(s) => {
+            println!("{}",s);
+        },
+        Err(_) => {},
+    };
+
+
+//    loop {
+//        let screen = AlternateScreen::from(stdout());
+//        screen.lock().flush();
+//        match run(&mut config_options, screen) {
+//            Some(_) => {
+//                break
+//            },
+//            None => {
+//            },
+//        }
+//    }
+    Ok(())
 }
