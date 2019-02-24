@@ -1,5 +1,5 @@
 [package]
-name = "todo"
+name = "rusty-todo"
 version = "0.1.0"
 authors = ["Tyler Wickline <twick00@gmail.com>"]
 edition = "2018"

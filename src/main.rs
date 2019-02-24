@@ -1,4 +1,3 @@
-
 #[macro_use]
 extern crate serde_derive;
 
@@ -14,10 +13,10 @@ fn main() {
     match run() {
         None => {
             println!("An Error Occurred")
-        },
+        }
         Some(exit_message) => {
             print!("{}", exit_message)
-        },
+        }
     }
 }
 
@@ -25,6 +24,7 @@ fn main() {
 struct DefaultConfig {
     pub jira_query: String,
 }
+
 impl DefaultConfig {
     pub fn new() -> Self {
         DefaultConfig {
@@ -34,50 +34,49 @@ impl DefaultConfig {
 }
 
 fn run() -> Option<String> {
-    let config:DefaultConfig = match configure() {
+    let config: DefaultConfig = match configure() {
         Ok(config) => {
             config
-        },
+        }
         Err(error) => {
             return Some(error.to_string());
-        },
+        }
     };
     let tickets = match get_tickets(&config) {
         Some(tickets) => {
             tickets
-        },
+        }
         None => {
-            return Some(String::from("\nNo tickets found"))
-        },
+            return Some(String::from("\nNo tickets found"));
+        }
     };
 
     loop {
         let selected_ticket = match select_ticket(&tickets) {
             Some(selected_ticket) => {
-                if selected_ticket >= tickets.len()  {
+                if selected_ticket >= tickets.len() {
                     return Some(String::from(""));
                 }
                 tickets.get(selected_ticket).cloned()
-            },
+            }
             None => {
                 panic!("An error ocurred when parsing selected ticket.")
-            },
+            }
         }.unwrap();
         match select_options() {
-            //View Details
             //Go To Ticket
             Some(0) => {
                 go_to_ticket(&selected_ticket);
                 break;
-            },
+            }
             //Exit
             Some(1) => {
                 break;
-            },
+            }
             //Back
-            Some(2) => {},
+            Some(2) => {}
             _ => {
-                return Some(String::from("An error occurred when parsing option selection"))
+                return Some(String::from("An error occurred when parsing option selection"));
             }
         }
     }
@@ -86,7 +85,7 @@ fn run() -> Option<String> {
 }
 
 fn go_to_ticket(ticket: &String) {
-    let slice:Vec<&str> = ticket.split(":").collect::<Vec<&str>>();
+    let slice: Vec<&str> = ticket.split(":").collect::<Vec<&str>>();
 
     Command::new("jira")
         .arg("browse")
@@ -114,7 +113,7 @@ fn select_ticket(tickets: &Vec<String>) -> Option<usize> {
 }
 
 fn get_tickets(config: &DefaultConfig) -> Option<Vec<String>> {
-    let jira_query:String = config.jira_query.clone();
+    let jira_query: String = config.jira_query.clone();
     let output = Command::new("jira")
         .arg("list")
         .arg("--query")
@@ -126,11 +125,11 @@ fn get_tickets(config: &DefaultConfig) -> Option<Vec<String>> {
     match tickets.len() {
         size if size >= 1 => {
             Some(tickets)
-        },
+        }
         size if size <= 0 => {
             //No tickets
             None
-        },
+        }
         _ => {
             //Error
             panic!("Failed to fetch tickets.")
@@ -139,16 +138,16 @@ fn get_tickets(config: &DefaultConfig) -> Option<Vec<String>> {
 }
 
 
-fn configure() -> Result<DefaultConfig, ConfigError>{
+fn configure() -> Result<DefaultConfig, ConfigError> {
     let mut config = config::Config::default();
     match config.merge(config::File::with_name("todo_config.json")) {
         Ok(config) => {
             config
-        },
+        }
         Err(_) => {
             let new_config = create_new_config();
-            return Ok(new_config.to_owned().deserialize().unwrap())
-        },
+            return Ok(new_config.to_owned().deserialize().unwrap());
+        }
     };
     Ok(config.deserialize().unwrap())
 }
@@ -158,10 +157,10 @@ fn create_new_config() -> Config {
     let config_string = match serde_json::to_string_pretty(&new_config) {
         Ok(config) => {
             config
-        },
+        }
         Err(_) => {
             panic!("Failed to serialize new default config into string")
-        },
+        }
     };
     let mut file = File::create("todo_config.json").unwrap();
     file.set_len(0);
